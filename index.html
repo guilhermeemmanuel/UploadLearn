@@ -3,66 +3,89 @@
     
     <head>
         <script src="libs/angular.js"></script>
-        
+        <link rel="stylesheet" type="text/css" href="Css/Style.css">
         
         <script>
         
             var app = angular.module('myApp', []);
             app.controller('myCtrl', function($scope) {
                 $scope.message = "";
-                $scope.add = function(){
+                
+                //Send Image to Server
+                $scope.send = function(){
                     
                     var f = document.getElementById('file').files[0],
                     r = new FileReader();
-                    r.onloadend = function(e){
+                    
+                    //This function is called after File Read ends.
+                    r.onloadend = function(e) {
                         var data = e.target.result;
+                        
+                        
                         //send you binary data via $http or $resource or do anything else with it
-                        $scope.message = "test";
-                        $scope.$apply();
+                        
+                        
+                        //$scope.message = "end Read";
+                        //$scope.$apply();
                     }
-                    r.onprogress = function(e){
+                    
+                    
+                    //This function is called during File Read progress.
+                    r.onprogress = function(e) {
                        
-                        $scope.message = "progress";
-                        $scope.$apply();
+                        
+                        //$scope.message = "progress";
+                        //$scope.$apply();
                     }
+                    
                     r.readAsBinaryString(f, "UTF-16");
-                    
-                    //r.readAsText();
-                    
                    
+                };
+                
+                //Set Image File, and add to Upload
+                $scope.setFile = function(element) {
+                    $scope.currentFile = element.files[0];
+                    var reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        $scope.image_source = event.target.result
+                        $scope.$apply()
+
+                    }
+                // when the file is read it triggers the onload event above.
+                reader.readAsDataURL(element.files[0]);
                 }
+                
+                //Validate file and call setFile function
+                $scope.load_image = function(id,e) {
+                    var ext = e.value;
+                    if($scope.validateExtension(ext) == false) {
+                        alert("Upload only JPEG or JPG format ");
+                        document.getElementById("file").value = "";
+                        document.getElementById("file").focus();
+                        return;
+                    }
+                $scope.setFile(e);
+                };
+                
+                //Verify extension file (allowed files: jpg, jpeg)
+                $scope.validateExtension = function(v) {
+                    var allowedExtensions = new Array("jpg","JPG","jpeg","JPEG");
+                    for(var ct=0; ct < allowedExtensions.length; ct++) {
+                        sample = v.lastIndexOf(allowedExtensions[ct]);
+                        if(sample != -1) {
+                            return true;
+                        }
+                    }
+                return false;
+                };
                 
             });
         
         </script>
         
         
-        <script type="text/javascript">
-            function load_image(id,ext)
-            {
-                if(validateExtension(ext) == false)
-                {
-                    alert("Upload only JPEG or JPG format ");
-                    document.getElementById("file").value = "";
-                    document.getElementById("file").focus();
-                    
-                    return;
-                }
-                document.getElementById("preview").src= ext;
-                    alert(ext);
-            }
-
-            function validateExtension(v)
-            {
-                var allowedExtensions = new Array("jpg","JPG","jpeg","JPEG");
-                for(var ct=0; ct < allowedExtensions.length; ct++)
-                {
-                    sample = v.lastIndexOf(allowedExtensions[ct]);
-                    if(sample != -1){return true;}
-                }
-            return false;
-            }
-        </script>
+       
         
         
     </head>
@@ -71,10 +94,12 @@
     
     <body>
         <div ng-app="myApp" ng-controller="myCtrl">
-            <p>Name : <input type="file" ng-model="name" id="file" accept="image/*" onChange="load_image(this.id,this.value)"></p>
-            <button ng-click="add()">Add</button>
-            <h1>File: {{message}}</h1>
-            <img src="" id="preview" />
+            <p>Name : <input type="file" ng-model="name" id="file" 
+                             accept="image/*" onChange="angular.element(this).scope().load_image(this.id,this)"></p>
+            <div id="dropbox" class="dropbox" ng-class="dropClass"><span>{{dropText}}</span></div>
+            <button ng-click="send()"> Submit </button>
+            <h1>Preview:</h1>
+            <img ng-src="{{image_source}}">
             
         </div>
     
