@@ -97,6 +97,8 @@
             <p>Name : <input type="file" ng-model="name" id="file" 
                              accept="image/*" onChange="angular.element(this).scope().load_image(this.id,this)"></p>
             <div id="dropbox" class="dropbox" ng-class="dropClass"><span>{{dropText}}</span></div>
+       
+            
             <button ng-click="send()"> Submit </button>
             <h1>Preview:</h1>
             <img ng-src="{{image_source}}">
